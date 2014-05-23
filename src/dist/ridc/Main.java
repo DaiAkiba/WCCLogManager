@@ -4,15 +4,18 @@ import oracle.stellent.ridc.IdcClient;
 import oracle.stellent.ridc.IdcClientManager;
 import oracle.stellent.ridc.model.DataBinder;
 import dist.config.ConfigurationController;
+import dist.database.AccessLogExportController;
 import dist.database.OracleDatabaseManager;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
-		ConfigurationController config = new ConfigurationController("/Users/akiba/tmp.xml");
+		ConfigurationController config = new ConfigurationController("/Users/akiba/properties.xml");
 		OracleDatabaseManager database = new OracleDatabaseManager(config.getProperites());
-		database.GetSctAccessLog();
-		database.GetRevisions();
-		database.GetDocMeta();
+		AccessLogExportController accessLogExporter = new AccessLogExportController(config.getProperty("exportfilepath"));
+		accessLogExporter.export(database.getConnection());
+		//database.GetSctAccessLog();
+		//database.GetRevisions();
+		//database.GetDocMeta();
 	}
 	
 	public void RIDCTest () throws Exception {

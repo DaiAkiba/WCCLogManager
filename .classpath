@@ -10,6 +10,7 @@
 	<classpathentry kind="lib" path="lib/httpmime-4.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/oracle.ucm.ridc-11.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/ojdbc7.jar"/>
+	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
