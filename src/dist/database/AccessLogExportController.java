@@ -21,15 +21,14 @@ import au.com.bytecode.opencsv.CSVWriter;
  *
  */
 public class AccessLogExportController {
-	File exportFilePath;
-	private CSVWriter csvWriter;
+	private File exportFilePath;
 	
 	public AccessLogExportController(String strExportFilePath) {
 		exportFilePath = new File(strExportFilePath);
 	}
 	
 	public int export(Connection connection) throws Exception {
-		csvWriter = setupCsvWriter();
+		CSVWriter csvWriter = setupCsvWriter();
 		final String baseQuery = "SELECT * FROM SctAccessLog acl"
 				+ " LEFT JOIN Revisions rev on (acl.sc_scs_dID = rev.dID)"
 				+ " LEFT JOIN DocMeta doc on (acl.sc_scs_dID = doc.dID)"
