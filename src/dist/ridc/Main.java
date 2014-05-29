@@ -9,10 +9,13 @@ import dist.database.OracleDatabaseManager;
 
 public class Main {
 	public static void main(String[] args) throws Exception {
-		ConfigurationController config = new ConfigurationController("/Users/akiba/properties.xml");
+		ConfigurationController config = new ConfigurationController("data/properties.xml");
 		OracleDatabaseManager database = new OracleDatabaseManager(config.getProperites());
-		AccessLogExportController accessLogExporter = new AccessLogExportController(config.getProperty("exportfilepath"));
-		accessLogExporter.export(database.getConnection());
+		AccessLogExportController accessLogExporter = new AccessLogExportController(config.getProperty("exportDirectoryPath") , config.getProperty("exportFileName"));
+		String strStartDate = "20140401";
+		String strEndDate = "20140531";
+		accessLogExporter.export(database.getConnection(), strStartDate, strEndDate, "");
+		database.getConnection().close();
 		//database.GetSctAccessLog();
 		//database.GetRevisions();
 		//database.GetDocMeta();
@@ -20,7 +23,7 @@ public class Main {
 	
 	public void RIDCTest () throws Exception {
 		IdcClientManager manager =new IdcClientManager();
-		IdcClient <?,?,?> client = manager.createClient("http://192.168.56.101:16200/cs/idcplg");
+		IdcClient <?,?,?> client = manager.createClient("http://192.168.56.199:16200/cs/idcplg");
 		//IdcContext	context =new IdcContext("weblogic", "welcome1");
 		
 		DataBinder binder = client.createBinder();

@@ -20,11 +20,8 @@ public class OracleDatabaseManager {
 	private Connection connection;
 	
 	public OracleDatabaseManager(Properties configInfo) {
-		
-		String address = "jdbc:oracle:thin:@" + configInfo.getProperty("IPAddress") + ":" + configInfo.getProperty("port") + "/" + configInfo.getProperty("dbname");
-		
 		try {
-			connection = DriverManager.getConnection(address, configInfo.getProperty("account"), configInfo.getProperty("password"));
+			connection = DriverManager.getConnection(configInfo.getProperty("JdbcURL"), configInfo.getProperty("account"), configInfo.getProperty("password"));
 		}
 		catch (Exception e) {
 			// ????????????
@@ -36,7 +33,7 @@ public class OracleDatabaseManager {
 	}
 	
 	public void GetSctAccessLog() throws Exception {
-		System.out.println("---- SctAc  cessLog ----");
+		System.out.println("---- SctAccessLog ----");
 		File fileDir = new File("./SctAccessLog.csv");
 		
 		Writer out = new BufferedWriter(new OutputStreamWriter(

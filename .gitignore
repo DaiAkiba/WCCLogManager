@@ -1,2 +1,5 @@
 # git ignore bin directory
 bin
+
+# git ignore Exported File
+AccessLog.csv

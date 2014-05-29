@@ -23,28 +23,31 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class AccessLogExportController {
 	private File exportFilePath;
 	
-	public AccessLogExportController(String strExportFilePath) {
-		exportFilePath = new File(strExportFilePath);
+	public AccessLogExportController(String strExportDirectoryPath, String strExportFileName) {
+		if (strExportDirectoryPath.endsWith("/")) {
+			exportFilePath = new File(strExportDirectoryPath + strExportFileName);
+		}
+		else {
+			exportFilePath = new File(strExportDirectoryPath + "/" + strExportFileName);
+		}
 	}
 	
-	public int export(Connection connection) throws Exception {
+	public int export(Connection connection, String strStartDate, String strEndDate, String strOrder) throws Exception {
 		CSVWriter csvWriter = setupCsvWriter();
 		final String baseQuery = "SELECT * FROM SctAccessLog acl"
 				+ " LEFT JOIN Revisions rev on (acl.sc_scs_dID = rev.dID)"
 				+ " LEFT JOIN DocMeta doc on (acl.sc_scs_dID = doc.dID)"
 				+ " WHERE acl.eventDate > ? AND acl.eventDate < ?"
 				+ " ORDER BY acl.eventDate %s";
-		String query = String.format(baseQuery, getOrderByArgument(""));
+		String query = String.format(baseQuery, getOrderByArgument(strOrder));
 		try (PreparedStatement statement = connection.prepareStatement(query)) {
-			String strStartDate = "20140401";
-			String strEndDate = "20140531";
-			
 			statement.setDate(1, getDateByArgument(strStartDate));
 			statement.setDate(2, getDateByArgument(strEndDate));
 			try (ResultSet resultSet = statement.executeQuery()) {
 				csvWriter.writeAll(resultSet, true);
 			}
 		}
+
 		
 		csvWriter.close();
 		
