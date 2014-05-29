@@ -29,7 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 
-import au.com.bytecode.opencsv.CSVReader;
+import lib.custom.opencsv.CSVReader;
 import dist.config.ConfigurationController;
 import dist.database.AccessLogExportController;
 import dist.database.OracleDatabaseManager;
@@ -182,7 +182,7 @@ public class AccessLogExportControllerTest {
 		Calendar calDate = Calendar.getInstance();
 		calDate.set(year,month-1,day,0,0,0);
 		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyy HH:mm:ss");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyy HH:mm:ss z");
 		
 		return dateFormat.format(new Date(calDate.getTimeInMillis()));
 		

@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.Properties;
 
-import au.com.bytecode.opencsv.CSVWriter;
+import lib.custom.opencsv.CSVWriter;
 
 public class OracleDatabaseManager {
 	
