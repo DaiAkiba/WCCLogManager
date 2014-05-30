@@ -46,7 +46,9 @@ public class AccessLogExportControllerTest {
 	private static File partialData;
 	
 	private final static String EXPORT_FILE_NAME = "exportTest.csv";
-	private final static int TEST_DATA_LINE_COUNT = 4;
+	private final static int HEADER_LINE_COUNT = 1;
+	private final static int TEST_DATA_LINE_COUNT = 3;
+	private final static int TEST_LINE_COUNT = HEADER_LINE_COUNT + TEST_DATA_LINE_COUNT;
 	private final static int EVENT_DATE_COLUMN_INDEX = 3;
 	
 	@BeforeClass
@@ -99,7 +101,7 @@ public class AccessLogExportControllerTest {
 	public void ディレクトリパスの終端がスラッシュなしの場合にアクセスログをエクスポートできる() throws Exception {
 		exportController = new AccessLogExportController(".",EXPORT_FILE_NAME);
 		exportController.export(database.getConnection(), "20140401", "20140531", "");
-		int expected = TEST_DATA_LINE_COUNT;
+		int expected = TEST_LINE_COUNT;
 		int result = getExportedLineCount();
 		assertThat(result, is(expected));
 	}
@@ -108,7 +110,7 @@ public class AccessLogExportControllerTest {
 	public void ディレクトリパスの終端がスラッシュありの場合にアクセスログをエクスポートできる() throws Exception {
 		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
 		exportController.export(database.getConnection(), "20140401", "20140531", "");
-		int expected = TEST_DATA_LINE_COUNT;
+		int expected = TEST_LINE_COUNT;
 		int result = getExportedLineCount();
 		assertThat(result, is(expected));
 	}
@@ -157,11 +159,19 @@ public class AccessLogExportControllerTest {
 		String result = exportedData.get(1)[EVENT_DATE_COLUMN_INDEX];
 		assertThat(result, is(expected));
 		
+		int expectedLineCount = HEADER_LINE_COUNT + 1;
+		int resultLineCount = exportedData.size();
+		assertThat(resultLineCount, is(expectedLineCount));
+		
 		exportController.export(database.getConnection(), "20140401", "20140430", "");
 		getExportedData(exportedData);
 		expected = getExpectedDateString(2014,4,10);
 		result = exportedData.get(1)[EVENT_DATE_COLUMN_INDEX];
 		assertThat(result, is(expected));
+		
+		expectedLineCount = HEADER_LINE_COUNT + 2;
+		resultLineCount = exportedData.size();
+		assertThat(resultLineCount, is(expectedLineCount));
 	}
 	
 	private int getExportedLineCount() throws Exception {
