@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import lib.custom.opencsv.CSVReader;
+
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.database.QueryDataSet;
@@ -25,11 +27,11 @@ import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.dataset.xml.FlatXmlProducer;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 
-import lib.custom.opencsv.CSVReader;
 import dist.config.ConfigurationController;
 import dist.database.AccessLogExportController;
 import dist.database.OracleDatabaseManager;
@@ -47,12 +49,12 @@ public class AccessLogExportControllerTest {
 	
 	private final static String EXPORT_FILE_NAME = "exportTest.csv";
 	private final static int HEADER_LINE_COUNT = 1;
-	private final static int TEST_DATA_LINE_COUNT = 3;
+	private final static int TEST_DATA_LINE_COUNT = 7;
 	private final static int TEST_LINE_COUNT = HEADER_LINE_COUNT + TEST_DATA_LINE_COUNT;
 	private final static int EVENT_DATE_COLUMN_INDEX = 3;
 	
 	@BeforeClass
-	public static void DBのバックアップ取得してテストデータを投入する() throws Exception {
+	public static void setUp() throws Exception {
 		// DBのバックアップを取得する
 		config = new ConfigurationController("data/properties.xml");
 		database = new OracleDatabaseManager(config.getProperites());
@@ -71,8 +73,16 @@ public class AccessLogExportControllerTest {
 		DatabaseOperation.CLEAN_INSERT.execute(iConnection, dataSet);
 	}
 	
+	@Before
+	public void beforeEachTest() {
+		File fileExportFile = new File(EXPORT_FILE_NAME);
+		if (fileExportFile.exists()) {
+			fileExportFile.delete();
+		}
+	}
+	
 	@AfterClass
-	public static void バックアップしたDBを戻してテスト用ファイルを削除する() throws Exception {
+	public static void tearDown() throws Exception {
 		FlatXmlProducer xmlProducer = new FlatXmlProducer(new InputSource(partialData.getPath()));
 		IDataSet dataSet = new FlatXmlDataSet(xmlProducer);
 		DatabaseOperation.CLEAN_INSERT.execute(iConnection, dataSet);
@@ -81,6 +91,48 @@ public class AccessLogExportControllerTest {
 		fileExportFile.delete();
 		
 		database.getConnection().close();
+	}
+	
+	@Test
+	public void 取得開始日が不正の場合はエラーが返る() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+
+		int expected = -1;
+		int result = exportController.export(database.getConnection(), "abc", "20140131", "");
+		assertThat(result, is(expected));
+		
+		File fileExportFile = new File(EXPORT_FILE_NAME);
+		boolean expectedFile = false;
+		boolean resultFile = fileExportFile.exists();
+		assertThat(resultFile, is(expectedFile));
+	}
+	
+	@Test
+	public void 取得終了日が不正の場合はエラーが返る() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+
+		int expected = -1;
+		int result = exportController.export(database.getConnection(), "20140101", "abc", "");
+		assertThat(result, is(expected));
+		
+		File fileExportFile = new File(EXPORT_FILE_NAME);
+		boolean expectedFile = false;
+		boolean resultFile = fileExportFile.exists();
+		assertThat(resultFile, is(expectedFile));
+	}
+
+	@Test
+	public void ソート順が不正の場合はエラーが返る() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+
+		int expected = -1;
+		int result = exportController.export(database.getConnection(), "20140101", "20140131", "sample");
+		assertThat(result, is(expected));
+		
+		File fileExportFile = new File(EXPORT_FILE_NAME);
+		boolean expectedFile = false;
+		boolean resultFile = fileExportFile.exists();
+		assertThat(resultFile, is(expectedFile));
 	}
 	
 	@Test(expected = FileNotFoundException.class)
@@ -131,6 +183,23 @@ public class AccessLogExportControllerTest {
 	}
 	
 	@Test
+	public void ソートを指定しないとeventDateの昇順でソートされる() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+		
+		exportController.export(database.getConnection(), "20140401", "20140531", "");
+		List<String[]> exportedData = new ArrayList<String[]>();
+		getExportedData(exportedData);
+		String expected = getExpectedDateString(2014,4,10);
+		String result = exportedData.get(1)[EVENT_DATE_COLUMN_INDEX];
+		assertThat(result, is(expected));
+		
+		expected = getExpectedDateString(2014,5,27);
+		result = exportedData.get(TEST_DATA_LINE_COUNT)[EVENT_DATE_COLUMN_INDEX];
+		assertThat(result, is(expected));
+	}
+	
+	
+	@Test
 	public void eventDateによるソートができる() throws Exception {
 		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
 		
@@ -152,14 +221,14 @@ public class AccessLogExportControllerTest {
 	public void 取得範囲の指定ができる() throws Exception {
 		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
 		
-		exportController.export(database.getConnection(), "20140501", "20140531", "");
+		exportController.export(database.getConnection(), "20140501", "20140531", "DESC");
 		List<String[]> exportedData = new ArrayList<String[]>();
 		getExportedData(exportedData);
 		String expected = getExpectedDateString(2014,5,27);
 		String result = exportedData.get(1)[EVENT_DATE_COLUMN_INDEX];
 		assertThat(result, is(expected));
 		
-		int expectedLineCount = HEADER_LINE_COUNT + 1;
+		int expectedLineCount = HEADER_LINE_COUNT + 2;
 		int resultLineCount = exportedData.size();
 		assertThat(resultLineCount, is(expectedLineCount));
 		
@@ -169,8 +238,51 @@ public class AccessLogExportControllerTest {
 		result = exportedData.get(1)[EVENT_DATE_COLUMN_INDEX];
 		assertThat(result, is(expected));
 		
-		expectedLineCount = HEADER_LINE_COUNT + 2;
+		expectedLineCount = HEADER_LINE_COUNT + 5;
 		resultLineCount = exportedData.size();
+		assertThat(resultLineCount, is(expectedLineCount));
+	}
+	
+	@Test
+	public void 取得開始日と取得終了日を含むデータが取得できる() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+		
+		exportController.export(database.getConnection(), "20140427", "20140430", "");
+		List<String[]> exportedData = new ArrayList<String[]>();
+		getExportedData(exportedData);
+		String expected = getExpectedDateString(2014,4,27);
+		String result = exportedData.get(1)[EVENT_DATE_COLUMN_INDEX];
+		assertThat(result, is(expected));
+		
+		expected = "30-4-2014 23:59:59 JST";
+		result = exportedData.get(4)[EVENT_DATE_COLUMN_INDEX];
+		assertThat(result, is(expected));
+	}
+	
+	@Test
+	public void 取得開始日と取得終了日が同じでもデータが取得できる() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+		
+		exportController.export(database.getConnection(), "20140427", "20140427", "");
+		List<String[]> exportedData = new ArrayList<String[]>();
+		getExportedData(exportedData);
+		int expected = HEADER_LINE_COUNT + 1;
+		int result = getExportedLineCount();
+		assertThat(result, is(expected));
+	}
+	
+	@Test
+	public void データがない場合は列名だけ取得できる() throws Exception {
+		exportController = new AccessLogExportController("./",EXPORT_FILE_NAME);
+		exportController.export(database.getConnection(), "20140101", "20140131", "");
+		List<String[]> exportedData = new ArrayList<String[]>();
+		getExportedData(exportedData);
+		String expected = "SCTDATESTAMP";
+		String result = exportedData.get(0)[0];
+		assertThat(result, is(expected));
+		
+		int expectedLineCount = HEADER_LINE_COUNT;
+		int resultLineCount = exportedData.size();
 		assertThat(resultLineCount, is(expectedLineCount));
 	}
 	

@@ -33,11 +33,16 @@ public class AccessLogExportController {
 	}
 	
 	public int export(Connection connection, String strStartDate, String strEndDate, String strOrder) throws Exception {
+		int result = 0;
+		result = validateArguments( strStartDate, strEndDate, strOrder );
+		if (result != 0) {
+			return result;
+		}
 		CSVWriter csvWriter = setupCsvWriter();
 		final String baseQuery = "SELECT * FROM SctAccessLog acl"
 				+ " LEFT JOIN Revisions rev on (acl.sc_scs_dID = rev.dID)"
 				+ " LEFT JOIN DocMeta doc on (acl.sc_scs_dID = doc.dID)"
-				+ " WHERE acl.eventDate > ? AND acl.eventDate < ?"
+				+ " WHERE acl.eventDate >= ? AND acl.eventDate < ? + 1"
 				+ " ORDER BY acl.eventDate %s";
 		String query = String.format(baseQuery, getOrderByArgument(strOrder));
 		try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -47,11 +52,60 @@ public class AccessLogExportController {
 				csvWriter.writeAll(resultSet, true);
 			}
 		}
-
 		
 		csvWriter.close();
 		
 		return 0;
+	}
+	
+	private int validateArguments(String strStartDate, String strEndDate, String strOrder) {
+		int result = 0;
+		
+		result = validateDateArgument(strStartDate);
+		
+		if (result != 0) {
+			return result;
+		}
+		
+		result = validateDateArgument(strEndDate);
+		
+		if (result != 0) {
+			return result;
+		}
+		
+		result = validateOrderArgument(strOrder);
+		
+		if (result != 0) {
+			return result;
+		}
+		
+		return result;
+	}
+	
+	private int validateDateArgument(String strDate) {
+		if (strDate.length() < 0 || strDate.length() > 8) {
+			return -1;
+		}
+		
+		try {
+			Integer.parseInt(strDate);
+		}
+		catch (NumberFormatException e) {
+			return -1;
+		}
+		return 0;
+	}
+	
+	private int validateOrderArgument(String strOrder) {
+		if (strOrder.matches("DESC") || strOrder.matches("ASC")) {
+			return 0;
+		}
+		
+		if (strOrder.length() == 0) {
+			return 0;
+		}
+
+		return -1;
 	}
 	
 	private CSVWriter setupCsvWriter() throws Exception {
@@ -69,9 +123,9 @@ public class AccessLogExportController {
 	}
 	
 	private Date getDateByArgument(String dateArgument) {
-		Integer year = Integer.parseInt(dateArgument.substring(0, 4));
-		Integer month = Integer.parseInt(dateArgument.substring(4,6));
-		Integer day = Integer.parseInt(dateArgument.substring(6, 8));
+		int year = Integer.parseInt(dateArgument.substring(0, 4));
+		int month = Integer.parseInt(dateArgument.substring(4,6));
+		int day = Integer.parseInt(dateArgument.substring(6, 8));
 		
 		Calendar calDate = Calendar.getInstance();
 		calDate.set(year,month-1,day,0,0,0);

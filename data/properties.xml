@@ -2,9 +2,9 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
     <comment>コメント</comment>
-    <entry key="JdbcURL">jdbc:oracle:thin:@192.168.56.199:xxxx/xxx</entry>
-    <entry key="account">xxxx</entry>
-    <entry key="password">xxxx</entry>
+    <entry key="JdbcURL">xxxxxx</entry>
+    <entry key="account">xxxxxx</entry>
+    <entry key="password">xxxxxx</entry>
     <entry key="exportFileName">AccessLog.csv</entry>
     <entry key="exportDirectoryPath">./</entry>
 </properties>
