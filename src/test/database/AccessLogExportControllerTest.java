@@ -6,10 +6,14 @@ package test.database;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -48,6 +52,8 @@ public class AccessLogExportControllerTest {
 	private static File partialData;
 	
 	private final static String EXPORT_FILE_NAME = "exportTest.csv";
+	private final static String FILE_ENCODE_STRING = "MS932";
+	private final static String RETURN_CODE_STRING = "\r\n";
 	private final static int HEADER_LINE_COUNT = 1;
 	private final static int TEST_DATA_LINE_COUNT = 7;
 	private final static int TEST_LINE_COUNT = HEADER_LINE_COUNT + TEST_DATA_LINE_COUNT;
@@ -149,6 +155,22 @@ public class AccessLogExportControllerTest {
 		exportController.export(connection, "20140401", "20140531", "");
 	}
 
+	@Test
+	public void ファイルフォーマットはMS932で改行コードはCRLFである() throws Exception {
+		exportController = new AccessLogExportController(".",EXPORT_FILE_NAME);
+		exportController.export(database.getConnection(), "20140401", "20140531", "");
+		List<String[]> exportedData = new ArrayList<String[]>();
+		getExportedData(exportedData);
+		boolean expected = true;
+		boolean result = exportedData.get(1)[30].equals(new String(exportedData.get(1)[30].getBytes(FILE_ENCODE_STRING), FILE_ENCODE_STRING));
+		assertThat(result, is(expected));
+		
+		String expectedReturnCode = RETURN_CODE_STRING;
+		String resultReturnCode = getReturnCode();
+		System.out.println(exportedData.get(0)[0]);
+		assertThat(resultReturnCode, is(expectedReturnCode));
+	}
+	
 	@Test
 	public void ディレクトリパスの終端がスラッシュなしの場合にアクセスログをエクスポートできる() throws Exception {
 		exportController = new AccessLogExportController(".",EXPORT_FILE_NAME);
@@ -295,9 +317,10 @@ public class AccessLogExportControllerTest {
 	
 	private void getExportedData(List<String[]> exportedData) throws Exception {
 		exportedData.clear();
-		CSVReader reader = new CSVReader(new FileReader(new File(EXPORT_FILE_NAME)));
-		exportedData.addAll(reader.readAll());
-		reader.close();
+		Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(EXPORT_FILE_NAME), FILE_ENCODE_STRING));
+		CSVReader csvReader = new CSVReader(reader);
+		exportedData.addAll(csvReader.readAll());
+		csvReader.close();
 	}
 	
 	private String getExpectedDateString(int year, int month, int day) {
@@ -307,6 +330,24 @@ public class AccessLogExportControllerTest {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyy HH:mm:ss z");
 		
 		return dateFormat.format(new Date(calDate.getTimeInMillis()));
+		
+	}
+	
+	private String getReturnCode() throws Exception {
+		InputStreamReader in = new InputStreamReader(new FileInputStream(EXPORT_FILE_NAME), FILE_ENCODE_STRING);
+		
+		int code = 0;
+		int next = 0;
+		
+		while((code = in.read()) != -1){
+			if (code == 0x0d || code == 0x0a) {
+				next = in.read();
+				break;
+			}
+		}
+		in.close();
+		
+		return String.format("%c%c", code,next);
 		
 	}
 }

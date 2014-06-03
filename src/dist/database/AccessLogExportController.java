@@ -109,7 +109,7 @@ public class AccessLogExportController {
 	}
 	
 	private CSVWriter setupCsvWriter() throws Exception {
-		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(exportFilePath), "UTF8"));
+		Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(exportFilePath), "MS932"));
 		
 		return new CSVWriter(writer,CSVWriter.DEFAULT_SEPARATOR ,CSVWriter.DEFAULT_QUOTE_CHARACTER,"\r\n");
 	}

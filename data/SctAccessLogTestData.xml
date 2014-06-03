@@ -16,7 +16,8 @@
         cs_userAgent="Java;+Stellent+CIS+11g"
         cs_cookie=""
         cs_referer=""
-        sc_scs_dID="3401"        sc_scs_dUser="weblogic"
+        sc_scs_dID="3401"
+        sc_scs_dUser="weblogic"
         sc_scs_idcService="CHECKIN_NEW"
         sc_scs_dDocName="1000"
         sc_scs_callingProduct=""
@@ -31,7 +32,7 @@
         sc_scs_authUser=""
         sc_scs_inetPassword=""
         sc_scs_serviceMsg=""
-        extField_1=""
+        extField_1="あいうえおー－㈱①"
         extField_2=""
         extField_3=""
         extField_4=""
@@ -54,6 +55,7 @@
         sc_scs_dDocName="1000"
         sc_scs_eventType="Checkin"
         comp_username="weblogic"
+        extField_1="あいうえおー－㈱①"
     />
     <SctAccessLog 
         SctDateStamp="2014-04-28"
@@ -68,6 +70,7 @@
         sc_scs_dDocName="1000"
         sc_scs_eventType="Checkin"
         comp_username="weblogic"
+        extField_1="あいうえおー－㈱①"
     />
     <SctAccessLog 
         SctDateStamp="2014-04-29"
@@ -82,6 +85,7 @@
         sc_scs_dDocName="1000"
         sc_scs_eventType="Checkin"
         comp_username="weblogic"
+        extField_1="あいうえおー－㈱①"
     />
     <SctAccessLog 
         SctDateStamp="2014-04-30 23:59:59"
@@ -96,6 +100,7 @@
         sc_scs_dDocName="1000"
         sc_scs_eventType="Checkin"
         comp_username="weblogic"
+        extField_1="あいうえおー－㈱①"
     />
     <SctAccessLog 
         SctDateStamp="2014-05-01 00:00:00"
@@ -110,6 +115,7 @@
         sc_scs_dDocName="1000"
         sc_scs_eventType="Checkin"
         comp_username="weblogic"
+        extField_1="あいうえおー－㈱①"
     />
     <SctAccessLog 
         SctDateStamp="2014-04-10"
@@ -124,5 +130,6 @@
         sc_scs_dDocName="1000"
         sc_scs_eventType="Checkin"
         comp_username="weblogic"
+        extField_1="あいうえおー－㈱①"
     />
 </dataset>
