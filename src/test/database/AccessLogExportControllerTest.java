@@ -167,7 +167,6 @@ public class AccessLogExportControllerTest {
 		
 		String expectedReturnCode = RETURN_CODE_STRING;
 		String resultReturnCode = getReturnCode();
-		System.out.println(exportedData.get(0)[0]);
 		assertThat(resultReturnCode, is(expectedReturnCode));
 	}
 	
