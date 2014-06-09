@@ -7,6 +7,7 @@ import oracle.stellent.ridc.model.DataBinder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import dist.util.ArgumentsUtil;
 import dist.config.ConfigurationController;
 import dist.database.AccessLogExportController;
 import dist.database.OracleDatabaseManager;
@@ -16,11 +17,16 @@ public class Main {
 	
 	public static void main(String[] args) throws Exception {
 		logger.info("処理を開始しました");
+		ArgumentsUtil arguments = new ArgumentsUtil(args);
+		if (validateRequiredArguments(arguments) != 0) {
+			logger.error("起動パラメータが不正です");
+			System.exit(-1);
+		}
 		ConfigurationController config = new ConfigurationController("data/properties.xml");
 		OracleDatabaseManager database = new OracleDatabaseManager(config.getProperites());
 		AccessLogExportController accessLogExporter = new AccessLogExportController(config.getProperty("exportDirectoryPath") , config.getProperty("exportFileName"));
 		String strStartDate = "20140401";
-		String strEndDate = "20140531";
+		String strEndDate = "20140630";
 		accessLogExporter.export(database.getConnection(), strStartDate, strEndDate, "");
 		database.getConnection().close();
 		logger.info("処理を終了しました");
@@ -41,5 +47,15 @@ public class Main {
 		
 		
 		//DataBinder result = client.sendRequest(context, binder).getResponseAsBinder();
+	}
+	
+	private static int validateRequiredArguments(ArgumentsUtil arguments) {
+		if (arguments.getValidateResult() != 0 ||
+			arguments.getStartByDate() == null ||
+			arguments.getEndByDate() == null) {
+			return -1;
+		}
+		
+		return 0;
 	}
 }
